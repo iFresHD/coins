@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Графики</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            max-width: 90%;
+            margin: 20px auto;
+        }
+        input, button {
+            margin: 5px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>График</h2>
+    <canvas id="myChart"></canvas>
+
+    <h3>Добавить данные</h3>
+    <input type="text" id="newLabel" placeholder="Дата (например, 27 марта 2025)">
+    <input type="number" id="newValue" placeholder="Цена">
+    <button onclick="addData()">Добавить</button>
+    <button onclick="clearData()">Очистить данные</button>
+
+    <script>
+        // Загружаем данные из localStorage
+        let storedData = localStorage.getItem('chartData');
+        let data = storedData ? JSON.parse(storedData) : { labels: [], values: [] };
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Цена',
+                    data: data.values,
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'blue'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+
+        function addData() {
+            let label = document.getElementById('newLabel').value;
+            let value = document.getElementById('newValue').value;
+            if (label && value) {
+                data.labels.push(label);
+                data.values.push(parseFloat(value));
+                chart.update();
+                localStorage.setItem('chartData', JSON.stringify(data));
+                document.getElementById('newLabel').value = "";
+                document.getElementById('newValue').value = "";
+            }
+        }
+
+        function clearData() {
+            localStorage.removeItem('chartData');
+            data.labels = [];
+            data.values = [];
+            chart.update();
+        }
+    </script>
+
+</body>
+</html>
+
