@@ -1,86 +1,42 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Графики</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        canvas {
-            max-width: 90%;
-            margin: 20px auto;
-        }
-        input, button {
-            margin: 5px;
-            padding: 8px;
-        }
-    </style>
-</head>
-<body>
+import React, { useState } from "react";
+import { Line } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
-    <h2>График</h2>
-    <canvas id="myChart"></canvas>
+const coinData = {
+  FreshCoin: { price: 1219.0, history: [1222, 1221, 1227, 1223, 1220, 1230, 1230, 1233, 1231, 1234, 1230, 1229, 1227, 1225, 1224, 1220, 1217, 1221, 1223, 1235, 1230, 1227, 1226, 1224, 1222, 1220] },
+  LimeCoin: { price: 626.6, history: [610, 618, 614, 613, 615, 617, 619, 620, 622, 630, 624, 621, 620, 618, 617, 618, 617, 620, 621, 618, 617, 615, 622, 625, 627, 628] },
+  PlayCoin: { price: 197.1, history: [146, 147, 181, 177, 175, 178, 170, 174, 171, 168, 165, 160, 157, 155, 154, 149, 156, 174, 179, 169, 182, 185, 188, 194, 186, 188] },
+};
 
-    <h3>Добавить данные</h3>
-    <input type="text" id="newLabel" placeholder="Дата (например, 27 марта 2025)">
-    <input type="number" id="newValue" placeholder="Цена">
-    <button onclick="addData()">Добавить</button>
-    <button onclick="clearData()">Очистить данные</button>
+export default function CryptoChartApp() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [selectedCoin, setSelectedCoin] = useState("FreshCoin");
+  const [showDetails, setShowDetails] = useState(false);
 
-    <script>
-        // Загружаем данные из localStorage
-        let storedData = localStorage.getItem('chartData');
-        let data = storedData ? JSON.parse(storedData) : { labels: [], values: [] };
-
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Цена',
-                    data: data.values,
-                    borderColor: 'blue',
-                    borderWidth: 2,
-                    fill: false,
-                    pointRadius: 5,
-                    pointBackgroundColor: 'blue'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: false }
-                }
-            }
-        });
-
-        function addData() {
-            let label = document.getElementById('newLabel').value;
-            let value = document.getElementById('newValue').value;
-            if (label && value) {
-                data.labels.push(label);
-                data.values.push(parseFloat(value));
-                chart.update();
-                localStorage.setItem('chartData', JSON.stringify(data));
-                document.getElementById('newLabel').value = "";
-                document.getElementById('newValue').value = "";
-            }
-        }
-
-        function clearData() {
-            localStorage.removeItem('chartData');
-            data.labels = [];
-            data.values = [];
-            chart.update();
-        }
-    </script>
-
-</body>
-</html>
+  return (
+    <div className={darkMode ? "bg-black text-white min-h-screen" : "bg-white text-black min-h-screen"}>
+      <div className="flex justify-between p-4">
+        <h1 className="text-xl font-bold">{selectedCoin}</h1>
+        <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+      </div>
+      <Card className="m-4 p-4">
+        <CardContent>
+          <p>Price: ${coinData[selectedCoin].price}</p>
+          <Line data={coinData[selectedCoin].history} />
+          <Button onClick={() => setShowDetails(true)} className="mt-2">Подробнее</Button>
+        </CardContent>
+      </Card>
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent>
+          <DialogTitle>Графики {selectedCoin}</DialogTitle>
+          <p>Суточный / Недельный / Месячный график</p>
+          <Line data={coinData[selectedCoin].history} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
 
